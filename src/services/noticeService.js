@@ -1,10 +1,7 @@
-import { parse } from "node-html-parser";
-
 class NoticeService {
     constructor(targetUrl) {
         this.targetUrl = targetUrl;
         this.listeners = new Set(); // Store update listeners
-        // Get last notice number from localStorage or use default
         this.lastNoticeNumber =
             parseInt(localStorage.getItem("lastNoticeNumber")) || 150520258936;
     }
