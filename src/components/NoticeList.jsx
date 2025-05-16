@@ -51,7 +51,6 @@ const NoticeList = ({ targetUrl }) => {
                             "&body=" +
                             encodeURIComponent(body)
                     );
-                    alert(await response.text());
                 })();
             }
         };
