@@ -19,7 +19,12 @@ const NoticeList = ({ targetUrl }) => {
 
                 const cleanup = await noticeService.startMonitoring();
 
+                const handleNewNotices = (newNotices) => {
+                    setNotices(newNotices);
+                };
+                const listener = noticeService.onNewNotices(handleNewNotices);
                 return () => {
+                    listener();
                     cleanup();
                 };
             } catch (err) {
