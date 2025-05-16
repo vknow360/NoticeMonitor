@@ -48,16 +48,27 @@ class NoticeService {
 
     async fetchNotices() {
         try {
-            const response = await fetch(
-                "https://exp.sunnythedeveloper.in/scrapper.php"
-            );
-            const json = await response.json();
+            let html = "";
+            if (import.meta.env.VITE_TEST_MODE) {
+                const response = await fetch(
+                    "https://exp.sunnythedeveloper.in/scrapper.php"
+                );
+                const json = await response.json();
 
-            if (!json.success) {
-                throw new Error(json.error || "Failed to fetch data");
+                if (!json.success) {
+                    throw new Error(json.error || "Failed to fetch data");
+                }
+
+                html = json.data;
+            } else {
+                const response = await fetch(
+                    "https://exp.sunnythedeveloper.in/notice.html"
+                );
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                html = await response.text();
             }
-
-            const html = json.data;
             const root = parse(html);
             const notices = [];
 
