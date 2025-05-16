@@ -62,7 +62,7 @@ class NoticeService {
                 html = json.data;
             } else {
                 const response = await fetch(
-                    "https://exp.sunnythedeveloper.in/notice.html"
+                    "https://exp.sunnythedeveloper.in/notices.html"
                 );
                 if (!response.ok) {
                     throw new Error("Network response was not ok");
