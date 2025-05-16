@@ -9,51 +9,7 @@ const NoticeList = ({ targetUrl }) => {
     const [subscribing, setSubscribing] = useState(false);
 
     useEffect(() => {
-        const noticeService = new NoticeService(targetUrl); // Request notification permission on component mount
-        if ("Notification" in window && Notification.permission === "default") {
-            Notification.requestPermission();
-        }
-
-        const handleNewNotices = (newNotices) => {
-            setNotices(newNotices); // Show notification for new notices
-            if (newNotices.length > 0) {
-                const title = `New Notice: ${newNotices[0].title}`;
-
-                // Create a more detailed body with formatting
-                let body = `<h2>New Notice Update</h2>`;
-                body += `<h3>${newNotices[0].title}</h3>`;
-                body += `<p>${newNotices[0].content}</p>`;
-
-                if (newNotices.length > 1) {
-                    body += `<hr><p><strong>+ ${
-                        newNotices.length - 1
-                    } more notice${
-                        newNotices.length > 2 ? "s" : ""
-                    } available:</strong></p>`;
-                    // Add titles of additional notices (up to 3)
-                    const additionalNotices = newNotices.slice(1, 4);
-                    body += `<ul>`;
-                    additionalNotices.forEach((notice) => {
-                        body += `<li>${notice.title}</li>`;
-                    });
-                    body += `</ul>`;
-                    if (newNotices.length > 4) {
-                        body += `<p>...and ${newNotices.length - 4} more</p>`;
-                    }
-                }
-
-                body += `<hr><p><small><a href="https://notice-monitor.vercel.app">Visit the website</a> to view all notices.</small></p>`;
-
-                (async () => {
-                    const response = await fetch(
-                        "https://exp.sunnythedeveloper.in/notifier.php?subject=" +
-                            encodeURIComponent(title) +
-                            "&body=" +
-                            encodeURIComponent(body)
-                    );
-                })();
-            }
-        };
+        const noticeService = new NoticeService(targetUrl);
 
         const initialize = async () => {
             try {
@@ -63,12 +19,8 @@ const NoticeList = ({ targetUrl }) => {
 
                 const cleanup = await noticeService.startMonitoring();
 
-                const removeListener =
-                    noticeService.onNewNotices(handleNewNotices);
-
                 return () => {
                     cleanup();
-                    removeListener();
                 };
             } catch (err) {
                 setError("Failed to fetch notices");
@@ -93,7 +45,8 @@ const NoticeList = ({ targetUrl }) => {
         setSubscribing(true);
         try {
             const response = await fetch(
-                "https://exp.sunnythedeveloper.in/subscribe.php?email=" + email
+                "https://monitor-server-mcb7.onrender.com/api/subscribe?email=" +
+                    email
             );
             alert(await response.text());
             setEmail("");

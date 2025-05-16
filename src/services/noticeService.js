@@ -45,94 +45,24 @@ class NoticeService {
             this.monitoringInterval = null;
         }
     }
-
     async fetchNotices() {
         try {
             const response = await fetch(
-                "https://exp.sunnythedeveloper.in/scrapper.php"
+                "https://monitor-server-mcb7.onrender.com/api/notices"
             );
-            const json = await response.json();
+            const notices = await response.json();
 
-            if (!json.success) {
-                throw new Error(json.error || "Failed to fetch data");
+            if (!notices || !Array.isArray(notices)) {
+                throw new Error("Invalid response from server");
             }
 
-            const html = json.data;
-            const root = parse(html);
-            const notices = [];
-
-            const noticeTable = root.querySelector(
-                "#ContentPlaceHolder2_ContentPlaceHolder3_GridView1"
-            );
-
-            if (!noticeTable) {
-                console.log("Notice table not found");
-                return notices;
-            }
-
-            // Find all rows
-            const rows = noticeTable.querySelectorAll("tr");
-            console.log("Found rows:", rows.length);
-
-            // Skip the header row (i=0)
-            for (let i = 1; i < rows.length; i++) {
-                const firstCell = rows[i].querySelector("td");
-                if (firstCell) {
-                    const span = firstCell.querySelector("span");
-                    const anchor = firstCell.querySelector("a");
-
-                    if (span && anchor) {
-                        const title = span.text.trim();
-                        const link = anchor.getAttribute("href");
-
-                        if (title && title.length > 0) {
-                            try {
-                                const noticeUrl = link
-                                    ? new URL(link, "https://mmmut.ac.in/").href
-                                    : null;
-                                const notice = {
-                                    id: i,
-                                    title: title,
-                                    content: "",
-                                    link: noticeUrl,
-                                    isNew: false,
-                                };
-                                notices.push(notice);
-                            } catch (urlError) {
-                                console.error(
-                                    "Error processing URL:",
-                                    link,
-                                    urlError
-                                );
-                                const notice = {
-                                    id: i,
-                                    title: title,
-                                    content: "",
-                                    link: link,
-                                    isNew: false,
-                                };
-                                notices.push(notice);
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Find new notices based on notice number in URL
             let newNotices = [];
-            let foundOldNotice = false;
-
             for (const notice of notices) {
-                const noticeNumber = this.extractNoticeNumber(notice.link);
-                if (noticeNumber > this.lastNoticeNumber) {
-                    notice.isNew = true;
+                if (notice.isNew) {
                     newNotices.push(notice);
-                } else {
-                    break;
                 }
             }
 
-            // Update lastNoticeNumber if we found new notices
             if (newNotices.length > 0) {
                 const highestNumber = Math.max(
                     ...newNotices.map((notice) =>
